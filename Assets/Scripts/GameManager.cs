@@ -9,6 +9,9 @@ namespace Com.MyCompany.MyGame
 {
     public class GameManager : MonoBehaviourPunCallbacks
     {
+        [SerializeField]
+        // private GameObject textDisplay;
+
         #region Photon Callbacks
         /// <summary>
         /// Called when the local player left the room. We need to load the launcher scene.
@@ -27,16 +30,16 @@ namespace Com.MyCompany.MyGame
         #endregion
 
         #region Private Methods
-        void LoadArena()
-        {
-            if (!PhotonNetwork.IsMasterClient)
-            {
-                Debug.LogError("PhotonNetwork : Trying to Load a level but we are not the master Client");
-            }
-            Debug.LogFormat("PhotonNetwork : Loading Level : 1"); // {0}", PhotonNetwork.CurrentRoom.PlayerCount);
-            // PhotonNetwork.LoadLevel("Room for " + PhotonNetwork.CurrentRoom.PlayerCount);
-            PhotonNetwork.LoadLevel("Room for 1");
-        }
+        // void LoadArena()
+        // {
+        //     if (!PhotonNetwork.IsMasterClient)
+        //     {
+        //         Debug.LogError("PhotonNetwork : Trying to Load a level but we are not the master Client");
+        //     }
+        //     Debug.LogFormat("PhotonNetwork : Loading Level : 1"); // {0}", PhotonNetwork.CurrentRoom.PlayerCount);
+        //     // PhotonNetwork.LoadLevel("Room for " + PhotonNetwork.CurrentRoom.PlayerCount);
+        //     PhotonNetwork.LoadLevel("Room for 1");
+        // }
         #endregion
 
         #region Photon Callbacks
@@ -48,7 +51,7 @@ namespace Com.MyCompany.MyGame
             {
                 Debug.LogFormat("OnPlayerEnteredRoom IsMasterClient {0}", PhotonNetwork.IsMasterClient); // called before OnPlayerLeftRoom
 
-                LoadArena();
+                // LoadArena();
             }
         }
 
@@ -59,7 +62,7 @@ namespace Com.MyCompany.MyGame
             if (PhotonNetwork.IsMasterClient)
             {
                 Debug.LogFormat("OnPlayerLeftRoom IsMasterClient {0}", PhotonNetwork.IsMasterClient); // called before OnPlayerLeftRoom
-                LoadArena();
+                // LoadArena();
             }
         }
 

@@ -15,7 +15,11 @@ namespace Com.MyCompany.MyGame
         /// </summary>
         [Tooltip("The maximum number of players per room. When a room is full, it can't be joined by new players, and so new room will be created")]
         [SerializeField]
-        private byte maxPlayersPerRoom = 4;
+        private static byte maxPlayersPerRoom = 4;
+
+        private string defaultRoomName = "defaultExerciseRoom";
+        RoomOptions roomOptions = new RoomOptions { MaxPlayers = maxPlayersPerRoom };
+
         #endregion
 
 
@@ -92,7 +96,7 @@ namespace Com.MyCompany.MyGame
         }
 
     #endregion
-
+    
     #region MonoBehaviourPunCallbacks Callbacks
     public override void OnConnectedToMaster()
     {
@@ -103,7 +107,9 @@ namespace Com.MyCompany.MyGame
         if (isConnecting)
         {
             // #Critical: The first we try to do is to join a potential existing room. If there is, good, else, we'll be called back with OnJoinRandomFailed()
-            PhotonNetwork.JoinRandomRoom();
+            // PhotonNetwork.JoinRandomRoom();
+            Debug.Log("JoinOrCreateRoom " + defaultRoomName);
+            PhotonNetwork.JoinOrCreateRoom(defaultRoomName, roomOptions, TypedLobby.Default);
             isConnecting = false;
         }
     }
@@ -121,7 +127,8 @@ namespace Com.MyCompany.MyGame
         Debug.Log("PUN Basics Tutorial/Launcher:OnJoinRandomFailed() was called by PUN. No random room available, so we create one.\nCalling: PhotonNetwork.CreateRoom");
 
         // #Critical: we failed to join a random room, maybe none exists or they are all full. No worries, we create a new room.
-        PhotonNetwork.CreateRoom(null, new RoomOptions { MaxPlayers = maxPlayersPerRoom });
+        // PhotonNetwork.CreateRoom(null, new RoomOptions { MaxPlayers = maxPlayersPerRoom });
+        PhotonNetwork.CreateRoom(defaultRoomName, roomOptions);
     }
 
     public override void OnJoinedRoom()
