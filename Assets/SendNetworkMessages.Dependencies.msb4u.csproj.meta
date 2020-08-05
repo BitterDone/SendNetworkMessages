@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: 35478a0f36de9d54989bdb3831b7be1a
+ScriptedImporter:
+  fileIDToRecycleName:
+    11400000: SendNetworkMessages.Dependencies.msb4u
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 0e4dca1acba66fd478b3854f09a32ec7, type: 3}
+  buildEngine: 0
+  profiles: []
