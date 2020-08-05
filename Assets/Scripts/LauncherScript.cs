@@ -195,22 +195,20 @@ namespace Com.MyCompany.MyGame
         _print(true, "PUN Basics Tutorial/Launcher: OnJoinedRoom() called by PUN. Now this client is in a room.");
         // progressLabel.SetActive(true); // only for GameObject, changed to Text
 
-        // #Critical: We only load if we are the first player, else we rely on `PhotonNetwork.AutomaticallySyncScene` to sync our instance scene.
-        if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
-        {
+        // // #Critical: We only load if we are the first player, else we rely on `PhotonNetwork.AutomaticallySyncScene` to sync our instance scene.
+        _print(true, "Name: " + PhotonNetwork.CurrentRoom.Name);
+        _print(true, "PlayerCount: " + PhotonNetwork.CurrentRoom.PlayerCount);
+        _print(true, "EmptyRoomTtl: " + PhotonNetwork.CurrentRoom.EmptyRoomTtl);
+        // if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
+        // {
             _print(true, "We load the 'Room for 1' ");
 
 
-            // #Critical
-            // Load the Room Level.
-            // PhotonNetwork.LoadLevel("Room for 1");
-
-            
-            if (base.photonView.IsMine) {
+            // if (base.photonView.IsMine) {
                 inRoom = true;
                 networkEventsEnable();
-            }
-        }
+            // }
+        // }
     }
 
         #endregion
