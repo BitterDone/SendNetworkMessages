@@ -116,9 +116,9 @@ namespace Com.MyCompany.MyGame
         if (isConnecting)
         {
             // #Critical: The first we try to do is to join a potential existing room. If there is, good, else, we'll be called back with OnJoinRandomFailed()
-            // PhotonNetwork.JoinRandomRoom();
-            _print(true, "JoinOrCreateRoom " + defaultRoomName);
-            PhotonNetwork.JoinOrCreateRoom(defaultRoomName, roomOptions, TypedLobby.Default);
+            PhotonNetwork.JoinRandomRoom();
+            // _print(true, "JoinOrCreateRoom " + defaultRoomName);
+            // PhotonNetwork.JoinOrCreateRoom(defaultRoomName, roomOptions, TypedLobby.Default);
             isConnecting = false;
         }
         // if (!PhotonNetwork.InLobby)
@@ -144,7 +144,8 @@ namespace Com.MyCompany.MyGame
 
         // #Critical: we failed to join a random room, maybe none exists or they are all full. No worries, we create a new room.
         // PhotonNetwork.CreateRoom(null, new RoomOptions { MaxPlayers = maxPlayersPerRoom });
-        PhotonNetwork.CreateRoom(defaultRoomName, roomOptions);
+        // PhotonNetwork.CreateRoom(defaultRoomName, roomOptions);
+        JoinOrCreateRoom();
     }
 
     public override void OnJoinedLobby()
@@ -172,15 +173,9 @@ namespace Com.MyCompany.MyGame
         _print(true, rooms);
     }
 
-    public override void OnPlayerEnteredRoom(Player newPlayer)
-    {
-        printNumberPlayers();
-    }
+    public override void OnPlayerEnteredRoom(Player newPlayer) { printNumberPlayers(); }
 
-    public override void OnPlayerLeftRoom(Player otherPlayer)
-    {
-        printNumberPlayers();
-    }
+    public override void OnPlayerLeftRoom(Player otherPlayer) { printNumberPlayers(); }
 
     private void printNumberPlayers()
     {
@@ -197,6 +192,13 @@ namespace Com.MyCompany.MyGame
 
         // // #Critical: We only load if we are the first player, else we rely on `PhotonNetwork.AutomaticallySyncScene` to sync our instance scene.
         _print(true, "Name: " + PhotonNetwork.CurrentRoom.Name);
+        
+        if (PhotonNetwork.CurrentRoom.Name != defaultRoomName) {
+            _print(true, "PhotonNetwork.CurrentRoom.Name != defaultRoomName");
+            _print(true, PhotonNetwork.CurrentRoom.Name + " != " + defaultRoomName);
+            JoinOrCreateRoom();
+        }
+
         _print(true, "PlayerCount: " + PhotonNetwork.CurrentRoom.PlayerCount);
         _print(true, "EmptyRoomTtl: " + PhotonNetwork.CurrentRoom.EmptyRoomTtl);
         // if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
@@ -210,6 +212,13 @@ namespace Com.MyCompany.MyGame
             // }
         // }
     }
+
+    public void JoinOrCreateRoom()
+    {
+        _print(true, "JoinOrCreateRoom " + defaultRoomName);
+        PhotonNetwork.JoinOrCreateRoom(defaultRoomName, roomOptions, TypedLobby.Default);
+    }
+    
 
         #endregion
 // ------------------------------------------------------------------------------
