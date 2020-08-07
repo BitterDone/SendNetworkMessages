@@ -12,9 +12,9 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
     [SerializeField]
     private Text progressLabel;
     [SerializeField]
-    private static byte maxPlayersPerRoom = 4;
+    private byte maxPlayersPerRoom = 4;
     private string defaultRoomName = "defaultExerciseRoom";
-    RoomOptions roomOptions = new RoomOptions { IsVisible = true, IsOpen = true, MaxPlayers = maxPlayersPerRoom };
+    RoomOptions roomOptions;
     private const byte COLOR_CHANGE_EVENT = 0;
 
     public static PhotonLobby Lobby;
@@ -24,6 +24,7 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
 
     private void Awake()
     {
+        roomOptions = new RoomOptions { IsVisible = true, IsOpen = true, MaxPlayers = maxPlayersPerRoom };
         if (Lobby == null)
         {
             Lobby = this;
