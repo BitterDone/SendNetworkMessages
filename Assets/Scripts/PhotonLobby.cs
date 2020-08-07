@@ -15,6 +15,7 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
     private static byte maxPlayersPerRoom = 4;
     private string defaultRoomName = "defaultExerciseRoom";
     RoomOptions roomOptions = new RoomOptions { IsVisible = true, IsOpen = true, MaxPlayers = maxPlayersPerRoom };
+    private const byte COLOR_CHANGE_EVENT = 0;
 
     public static PhotonLobby Lobby;
 
@@ -39,27 +40,24 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
         DontDestroyOnLoad(gameObject);
 
         StartNetwork();
-        // GenericNetworkManager.OnReadyToStartNetwork += StartNetwork;
     }
 
     public override void OnConnectedToMaster()
     {
-        _print(true, "\nPhotonLobby.OnConnectedToMaster() start");
         var randomUserId = UnityEngine.Random.Range(0, 999999);
         PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.AuthValues = new AuthenticationValues();
         PhotonNetwork.AuthValues.UserId = randomUserId.ToString();
         userIdCount++;
         PhotonNetwork.NickName = PhotonNetwork.AuthValues.UserId;
+        _print(true, "OnConnectedToMaster set props, joining random");
         PhotonNetwork.JoinRandomRoom();
-        _print(true, "\nPhotonLobby.OnConnectedToMaster() end");
     }
 
     public override void OnDisconnected(DisconnectCause cause)
     {
         _print(true, String.Format("PUN Basics Tutorial/Launcher: OnDisconnected() was called by PUN with reason {0}", cause));
         networkEventsDisable();
-        _print(true, String.Format("Cause: ", cause.ToString()));
     }
 
     public void JoinOrCreateRoom()
@@ -72,8 +70,7 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
     {
         base.OnJoinedRoom();
 
-        _print(true, "\nPhotonLobby.OnJoinedRoom()");
-        _print(true, "Current room name: " + PhotonNetwork.CurrentRoom.Name);
+        _print(true, "\nPhotonLobby.OnJoinedRoom(): " + PhotonNetwork.CurrentRoom.Name);
 
         if (PhotonNetwork.CurrentRoom.Name != defaultRoomName) {
             _print(true, "PhotonNetwork.CurrentRoom.Name != defaultRoomName");
@@ -82,8 +79,7 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
         }
 
         networkEventsEnable();
-        _print(true, "Other players in room: " + PhotonNetwork.CountOfPlayersInRooms);
-        _print(true, "Total players in room: " + (PhotonNetwork.CountOfPlayersInRooms + 1));
+        _print(true, "Other/Total players in room: " + PhotonNetwork.CountOfPlayersInRooms + " / " + (PhotonNetwork.CountOfPlayersInRooms + 1));
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
@@ -95,7 +91,6 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
         _print(true, "\nPhotonLobby.OnCreateRoomFailed()");
-        Debug.LogError("Creating Room Failed");
         CreateRoom();
     }
 
@@ -104,12 +99,6 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
         _print(true, "\nPhotonLobby.OnCreatedRoom()");
         base.OnCreatedRoom();
         roomNumber++;
-    }
-
-    public void OnCancelButtonClicked()
-    {
-        _print(true, "\nPhotonLobby.OnCancelButtonClicked()");
-        PhotonNetwork.LeaveRoom();
     }
 
     private void StartNetwork()
@@ -122,63 +111,36 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
     private void CreateRoom()
     {
         _print(true, "\nPhotonLobby.CreateRoom()");
-        // var roomOptions = new RoomOptions {IsVisible = true, IsOpen = true, MaxPlayers = 10};
-        // PhotonNetwork.CreateRoom("Room" + UnityEngine.Random.Range(1, 3000), roomOptions);
         JoinOrCreateRoom();
     }
 
-    private Queue<string> queue;
-    private string[] queueArr = new string[5];
-    private string queueStr = "";
-    private void _print(bool shouldPrint, string msg, bool collapse=false)
+    private void _print(bool shouldPrint, string msg)
     {
-        if (collapse) {
-            if (queue == null) {
-                queue = new Queue<string>();
-            }
-            queue.Enqueue(msg);
-            if (queue.Count > 5) 
-            {
-                queue.Dequeue();
-            }
-
-            queueArr = queue.ToArray();
-
-            queueStr = "";
-            foreach (var s in queue.ToArray())
-                queueStr += s;
-            // mineList.text = queue.Count + queueStr;
-            return;
-        }
         if (shouldPrint) Debug.Log(msg);
         if (shouldPrint) progressLabel.text += "\n" + msg;
     }
 
-    // -------------------- --------------------
-    
-        private const byte COLOR_CHANGE_EVENT = 0;
+    private void networkEventsEnable()
+    {
+        _print(true, "adding event callback");
+        PhotonNetwork.NetworkingClient.EventReceived += NetworkingClient_EventReceived;
+    }
 
-        private void networkEventsEnable()
-        {
-            _print(true, "adding event callback");
-            PhotonNetwork.NetworkingClient.EventReceived += NetworkingClient_EventReceived;
-        }
+    private void networkEventsDisable()
+    {
+        _print(true, "removing event callback");
+        PhotonNetwork.NetworkingClient.EventReceived -= NetworkingClient_EventReceived;
+    }
 
-        private void networkEventsDisable()
-        {
-            _print(true, "removing event callback");
-            PhotonNetwork.NetworkingClient.EventReceived -= NetworkingClient_EventReceived;
+    private void NetworkingClient_EventReceived(EventData obj)
+    {
+        if (obj.Code == COLOR_CHANGE_EVENT)
+        {   
+            _print(true, "received COLOR_CHANGE_EVENT");
         }
-
-        private void NetworkingClient_EventReceived(EventData obj)
+        else
         {
-            if (obj.Code == COLOR_CHANGE_EVENT)
-            {   
-                _print(true, "received COLOR_CHANGE_EVENT");
-            }
-            else
-            {
-                _print(true, "unhandled obj.Code: " + obj.Code);
-            }
+            _print(true, "unhandled obj.Code: " + obj.Code);
         }
+    }
 }
