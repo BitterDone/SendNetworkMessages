@@ -16,6 +16,7 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
     private string defaultRoomName = "defaultExerciseRoom";
     RoomOptions roomOptions;
     private const byte COLOR_CHANGE_EVENT = 0;
+    private const byte BODY_TRACKING_EVENT = 1;
 
     public static PhotonLobby Lobby;
 
@@ -135,13 +136,26 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
 
     private void NetworkingClient_EventReceived(EventData obj)
     {
-        if (obj.Code == COLOR_CHANGE_EVENT)
-        {   
-            _print(true, "received COLOR_CHANGE_EVENT");
-        }
-        else
+        if (obj == null || obj.Code == null) 
         {
-            _print(true, "unhandled obj.Code: " + obj.Code);
+            _print(true, "invalid EventData obj recieved");
+            return;
+        }
+
+        object[] datas = (object[])obj.CustomData;
+        switch (obj.Code) {
+            case COLOR_CHANGE_EVENT:
+                _print(true, "received COLOR_CHANGE_EVENT");
+                break;
+            case BODY_TRACKING_EVENT:
+                _print(true, "received BODY_TRACKING_EVENT");
+
+                string coordinateString = (string)datas[0];
+                _print(true, coordinateString);
+                break;
+            default:
+                _print(true, "default unhandled obj.Code: " + obj.Code);
+                break;
         }
     }
 }
