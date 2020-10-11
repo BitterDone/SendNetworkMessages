@@ -3,98 +3,90 @@ using Photon.Realtime;
 using UnityEngine;
 
 using ExitGames.Client.Photon;
-using System; // added for String.Format()
 using UnityEngine.UI;
 using System.Collections.Generic;
 
 public class PhotonLobby : MonoBehaviourPunCallbacks
-{
+{   // e9fe0af3-b001-4ef6-82d3-c102fafd5a63
     [SerializeField]
     private Text progressLabel;
+
     [SerializeField]
     private byte maxPlayersPerRoom = 4;
-    private string defaultRoomName = "defaultExerciseRoom";
-    RoomOptions roomOptions;
-    private const byte COLOR_CHANGE_EVENT = 0;
-    private const byte BODY_TRACKING_EVENT = 1;
 
     public static PhotonLobby Lobby;
 
+    private string defaultRoomName = "defaultExerciseRoom";
+    private const byte COLOR_CHANGE_EVENT = 0;
+    private const byte BODY_TRACKING_EVENT = 1;
     private int roomNumber = 1;
     private int userIdCount;
 
-    private void Awake()
-    {
+    RoomOptions roomOptions;
+
+    private void Start() {
+        _print(true, "Start begin");
         roomOptions = new RoomOptions { IsVisible = true, IsOpen = true, MaxPlayers = maxPlayersPerRoom };
-        if (Lobby == null)
-        {
+        if (Lobby == null) {
+            _print(true, "Start: Lobby == null");
             Lobby = this;
         }
-        else
-        {
-            if (Lobby != this)
-            {
-                Destroy(Lobby.gameObject);
-                Lobby = this;
-            }
+
+        if (Lobby != this) {
+            _print(true, "Start: Lobby != this");
+            Destroy(Lobby.gameObject);
+            Lobby = this;
         }
 
         DontDestroyOnLoad(gameObject);
-
-        StartNetwork();
+        _print(true, "ConnectUsingSettings begin");
+        PhotonNetwork.ConnectUsingSettings();
+        _print(true, "Start finish");
     }
 
-    public override void OnConnectedToMaster()
-    {
+    public override void OnConnectedToMaster() {
+        _print(true, "OnConnectedToMaster begin");
         var randomUserId = UnityEngine.Random.Range(0, 999999);
         PhotonNetwork.AutomaticallySyncScene = true;
         PhotonNetwork.AuthValues = new AuthenticationValues();
         PhotonNetwork.AuthValues.UserId = randomUserId.ToString();
         userIdCount++;
         PhotonNetwork.NickName = PhotonNetwork.AuthValues.UserId;
-        _print(true, "OnConnectedToMaster set props, joining random");
+        _print(true, "OnConnectedToMaster finish, joining random");
         PhotonNetwork.JoinRandomRoom();
     }
 
-    public override void OnDisconnected(DisconnectCause cause)
-    {
-        _print(true, String.Format("PUN Basics Tutorial/Launcher: OnDisconnected() was called by PUN with reason {0}", cause));
-        networkEventsDisable();
+    public override void OnJoinRandomFailed(short returnCode, string message) {
+        _print(true, "\nPhotonLobby.OnJoinRandomFailed()");
+        JoinOrCreateRoom_defaultRoomName();
     }
 
-    public void JoinOrCreateRoom()
-    {
-        _print(true, "JoinOrCreateRoom " + defaultRoomName);
+
+    public override void OnCreateRoomFailed(short returnCode, string message) {
+        _print(true, "\nPhotonLobby.OnCreateRoomFailed()");
+        JoinOrCreateRoom_defaultRoomName();
+    }
+
+    public void JoinOrCreateRoom_defaultRoomName() {
+        _print(true, "JoinOrCreateRoom_" + defaultRoomName);
         PhotonNetwork.JoinOrCreateRoom(defaultRoomName, roomOptions, TypedLobby.Default);
     }
 
-    public override void OnJoinedRoom()
-    {
+    public override void OnJoinedRoom() {
         base.OnJoinedRoom();
-
         _print(true, "\nPhotonLobby.OnJoinedRoom(): " + PhotonNetwork.CurrentRoom.Name);
 
         if (PhotonNetwork.CurrentRoom.Name != defaultRoomName) {
             _print(true, "PhotonNetwork.CurrentRoom.Name != defaultRoomName");
             _print(true, PhotonNetwork.CurrentRoom.Name + " != " + defaultRoomName);
-            JoinOrCreateRoom();
+            JoinOrCreateRoom_defaultRoomName();
         }
 
         networkEventsEnable();
         _print(true, "Other/Total players in room: " + PhotonNetwork.CountOfPlayersInRooms + " / " + (PhotonNetwork.CountOfPlayersInRooms + 1));
     }
 
-    public override void OnJoinRandomFailed(short returnCode, string message)
-    {
-        _print(true, "\nPhotonLobby.OnJoinRandomFailed()");
-        CreateRoom();
-    }
 
-    public override void OnCreateRoomFailed(short returnCode, string message)
-    {
-        _print(true, "\nPhotonLobby.OnCreateRoomFailed()");
-        CreateRoom();
-    }
 
     public override void OnCreatedRoom()
     {
@@ -103,25 +95,21 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
         roomNumber++;
     }
 
-    private void StartNetwork()
-    {
-        _print(true, "\nPhotonLobby.StartNetwork()");
-        PhotonNetwork.ConnectUsingSettings();
-        Lobby = this;
-    }
-
-    private void CreateRoom()
-    {
-        _print(true, "\nPhotonLobby.CreateRoom()");
-        JoinOrCreateRoom();
-    }
-
+#region Debugging -------------------------------------------------------------------------------
     private void _print(bool shouldPrint, string msg)
     {
         if (shouldPrint) Debug.Log(msg);
         if (shouldPrint) progressLabel.text += "\n" + msg;
     }
-
+#endregion
+    
+#region Networking -------------------------------------------------------------------------------
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        _print(true, $"PUN Basics Tutorial/Launcher: OnDisconnected() was called by PUN with reason {cause}");
+        networkEventsDisable();
+    }
+    
     private void networkEventsEnable()
     {
         _print(true, "adding event callback");
@@ -158,4 +146,5 @@ public class PhotonLobby : MonoBehaviourPunCallbacks
                 break;
         }
     }
+#endregion
 }
